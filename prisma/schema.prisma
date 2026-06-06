@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  admin
+  user
+}
+
+enum Status {
+  active
+  inactive
+}
+
+model User {
+  id         Int        @id @default(autoincrement())
+  fullName   String     @map("full_name")
+  email      String     @unique
+  password   String
+  role       Role       @default(user)
+  status     Status     @default(active)
+  isDeleted  Boolean    @default(false) @map("is_deleted")
+  lastLogin  DateTime?  @map("last_login")
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+  activities Activity[]
+
+  @@map("users")
+}
+
+model Activity {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
+  activityType String   @map("activity_type")
+  description  String
+  oldValues    Json?    @map("old_values") 
+  newValues    Json?    @map("new_values")
+  ipAddress    String?  @map("ip_address")
+  createdAt    DateTime @default(now()) @map("created_at")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("activity_logs")
+}
